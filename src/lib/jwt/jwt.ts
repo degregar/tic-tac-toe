@@ -6,13 +6,14 @@ import { jwtDecode } from "jwt-decode";
 export const generateJwtTokens = (
   userData: PublicUser & { iat?: number; exp?: number },
 ) => {
+  const { iat, exp, ...cleanedUserData } = userData;
   const jwtSecret = process.env.JWT_SECRET || "";
 
-  const jwtAccessToken = jwt.sign(userData, jwtSecret, {
+  const jwtAccessToken = jwt.sign(cleanedUserData, jwtSecret, {
     expiresIn: accessTokenExpiresIn,
   });
 
-  const jwtRefreshToken = jwt.sign(userData, jwtSecret, {
+  const jwtRefreshToken = jwt.sign(cleanedUserData, jwtSecret, {
     expiresIn: refreshTokenExpiresIn,
   });
 
@@ -33,7 +34,7 @@ export const refreshTokens = async (refreshToken: string) => {
     const userData = verifyToken(refreshToken);
 
     if (!userData) {
-      throw new Error("Invalid or expired refresh token");
+      throw new Error("Couldn't verify refresh token");
     }
 
     return generateJwtTokens(userData);
