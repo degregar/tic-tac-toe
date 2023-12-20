@@ -6,36 +6,14 @@ import {
   GameEvents,
   ReadyToPlayEvent,
 } from "@/lib/game/events";
-import { PublicUser } from "@/lib/user/types";
 import { v4 as uuidv4 } from "uuid";
 import { GameDto } from "@/lib/game/types";
-
-let queue: {
-  [key: string]: any;
-} = {};
-
-const isInQueue = (user: Pick<PublicUser, "uuid">) => {
-  return queue[user.uuid];
-};
-
-const addToQueue = (user: Pick<PublicUser, "uuid">, socketId: string) => {
-  queue[user.uuid] = { ...user, _socketId: socketId };
-};
-
-const getAnotherUserFromQueue = (
-  user: Pick<PublicUser, "uuid">,
-): (Pick<PublicUser, "uuid"> & { _socketId: string }) | null => {
-  const anotherUser = Object.values(queue).find(
-    (queueUser) => queueUser.uuid !== user.uuid,
-  );
-  return anotherUser;
-};
-
-const removeFromQueue = (user: Pick<PublicUser, "uuid">) => {
-  if (isInQueue(user)) {
-    delete queue[user.uuid];
-  }
-};
+import {
+  addToQueue,
+  getAnotherUserFromQueue,
+  isInQueue,
+  removeFromQueue,
+} from "@/lib/game/queue";
 
 const handleReadyToPlayEvent = (socket: Socket, data: ReadyToPlayEvent) => {
   if (!isInQueue(data.user)) {
