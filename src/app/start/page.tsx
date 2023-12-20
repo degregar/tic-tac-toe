@@ -1,15 +1,23 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { Spinner } from "@/components/Spinner";
-import { unsecuredAxios } from "@/lib/auth/axios";
 import { useAuth } from "@/lib/hooks/useAuth";
-import { useRouter } from "next/navigation";
 import { SecuredLayout } from "@/components/layouts/SecuredLayout";
-import { AuthProvider } from "@/lib/contexts/AuthContext";
+import { useGame } from "@/lib/hooks/useGame";
 
 const StartPage = () => {
   const { user, logout } = useAuth();
+  const { connect, isConnected, findPartner, currentGame } = useGame();
+
+  useEffect(() => {
+    void connect();
+  }, []);
+
+  useEffect(() => {
+    if (isConnected) {
+      void findPartner();
+    }
+  }, [isConnected]);
 
   return (
     <div className="flex justify-center items-center h-screen bg-cyan-50">
@@ -18,17 +26,13 @@ const StartPage = () => {
           Tic-Tac-Toe
         </h1>
 
-        <div className="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4"></div>
-        <button
-          className={
-            "py-2 px-4 rounded focus:outline-none focus:shadow-outline"
-          }
-          onClick={() => {
-            logout();
-          }}
-        >
-          Logout
-        </button>
+        <div className="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4">
+          {currentGame ? (
+            <div>Nowa gra: {currentGame.uuid}</div>
+          ) : (
+            <div>Wyszukiwanie partnera...</div>
+          )}
+        </div>
       </div>
     </div>
   );
