@@ -8,15 +8,18 @@ import {
   removeFromQueue,
 } from "@/lib/game/queue";
 import { GameDto } from "@/lib/game/types";
+import { SocketEvent } from "@/lib/game/game-event-handler";
 
-export const createNewGame = (socket: Socket, data: ReadyToPlayEvent) => {
+export const handleNewGame = (
+  data: ReadyToPlayEvent & { socketId: string },
+): SocketEvent[] => {
   if (!isInQueue(data.user)) {
-    addToQueue(data.user, socket.id);
+    addToQueue(data.user, data.socketId);
   }
 
   const anotherUser = getAnotherUserFromQueue(data.user);
   if (!anotherUser) {
-    return;
+    return [];
   }
 
   removeFromQueue(data.user);
@@ -29,6 +32,19 @@ export const createNewGame = (socket: Socket, data: ReadyToPlayEvent) => {
     winnerUuid: null,
   };
 
-  socket.emit(GameEvents.NEW_GAME_STARTED, game);
-  socket.to(anotherUser._socketId).emit(GameEvents.NEW_GAME_STARTED, game);
+  const event = {
+    type: GameEvents.NEW_GAME_STARTED,
+    data: game,
+  };
+
+  return [
+    {
+      ...event,
+      socketId: data.socketId,
+    },
+    {
+      ...event,
+      socketId: anotherUser._socketId,
+    },
+  ];
 };

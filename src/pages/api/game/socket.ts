@@ -1,8 +1,9 @@
-import { Server, ServerOptions } from "Socket.IO";
+import { Server, ServerOptions } from "socket.io";
 import { NextApiRequest, NextApiResponse } from "next";
 import { SocketEvents } from "@/lib/socket/types";
 import { GameEventPayload, GameEvents } from "@/lib/game/events";
-import { createNewGame } from "@/lib/game/create-new-game";
+import { handleNewGame } from "@/lib/game/handle-new-game";
+import { gameEventHandler } from "@/lib/game/game-event-handler";
 
 type NextApiResponseWithSocket = NextApiResponse & {
   socket: {
@@ -13,7 +14,7 @@ type NextApiResponseWithSocket = NextApiResponse & {
 };
 
 const SocketHandler = (req: NextApiRequest, res: NextApiResponseWithSocket) => {
-  if (res.socket?.server.io) {
+  if (res.socket.server.io) {
     res.end();
     return;
   }
@@ -21,22 +22,16 @@ const SocketHandler = (req: NextApiRequest, res: NextApiResponseWithSocket) => {
   const io = new Server(res.socket.server);
 
   io.on(SocketEvents.CONNECTION, (socket) => {
-    const clientId = socket.id;
+    const socketId = socket.id;
 
     socket.on(SocketEvents.DISCONNECT, () => {
       console.debug("A client disconnected.");
     });
 
-    socket.on("connect", () => {
-      console.debug("A client connected.", clientId);
-    });
-
     socket.on(SocketEvents.GAME_EVENT, (data: GameEventPayload) => {
-      if (data.type === GameEvents.READY_TO_PLAY) {
-        createNewGame(socket, data);
-      } else {
-        console.warn("unknown event", data);
-      }
+      gameEventHandler({ ...data, socketId }).forEach((event) => {
+        socket.to(event.socketId).emit(event.type, event.data);
+      });
     });
   });
 
