@@ -12,12 +12,14 @@ export const AuthContext = createContext<{
   logout: () => void;
   user: PublicUser | null;
   isSettled: boolean;
+  token: string | null;
 }>({
   isAuthenticated: false,
   login: async () => {},
   logout: () => {},
   user: null,
   isSettled: false,
+  token: null,
 });
 
 const getUserDataFromAccessToken = (accessToken: string): PublicUser | null => {
@@ -33,9 +35,11 @@ export const AuthProvider = ({ children }: { children: any }) => {
   const [user, setUser] = useState<PublicUser | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isSettled, setIsSettled] = useState(false);
+  const [token, setToken] = useState<string | null>(null);
 
   const init = async () => {
     const accessToken = getAccessToken();
+    setToken(accessToken);
 
     if (accessToken) {
       const userData = await getUserDataFromAccessToken(accessToken);
@@ -61,15 +65,19 @@ export const AuthProvider = ({ children }: { children: any }) => {
           if (userData) {
             setUser(userData);
             setIsAuthenticated(!!userData);
+            setToken(tokens.jwtAccessToken);
           }
         },
         logout: () => {
           logout();
+
           setUser(null);
           setIsAuthenticated(false);
+          setToken(null);
         },
         user,
         isSettled,
+        token,
       }}
     >
       {children}

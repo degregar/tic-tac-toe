@@ -1,21 +1,15 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
-import { useAuth } from "@/lib/hooks/useAuth";
+import React, { useEffect } from "react";
 import { SecuredLayout } from "@/components/layouts/SecuredLayout";
 import { useGame } from "@/lib/hooks/useGame";
 
 const StartPage = () => {
-  const { user, logout } = useAuth();
-  const { connect, isConnected, findPartner, currentGame } = useGame();
-
-  useEffect(() => {
-    void connect();
-  }, []);
+  const { isConnected, startNewGame, currentGame } = useGame();
 
   useEffect(() => {
     if (isConnected) {
-      void findPartner();
+      void startNewGame();
     }
   }, [isConnected]);
 

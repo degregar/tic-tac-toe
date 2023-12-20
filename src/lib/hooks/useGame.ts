@@ -1,16 +1,22 @@
-import { useState } from "react";
-import { Socket } from "socket.io-client";
 import { useAuth } from "@/lib/hooks/useAuth";
-import { GameDto } from "@/lib/game/types";
 import { useSocket } from "@/lib/hooks/useSocket";
 import { GameEvents } from "@/lib/game/events";
+import { useEffect } from "react";
 
 export const useGame = () => {
-  const { user } = useAuth();
+  const { user, token } = useAuth();
   const { emit, connect, disconnect, isConnected, currentGame } =
-    useSocket(user);
+    useSocket(token);
 
-  const findPartner = async () => {
+  useEffect(() => {
+    void connect();
+
+    return () => {
+      disconnect();
+    };
+  }, []);
+
+  const startNewGame = async () => {
     if (!user) {
       return;
     }
@@ -19,10 +25,8 @@ export const useGame = () => {
   };
 
   return {
-    connect,
-    disconnect,
     isConnected,
-    findPartner,
+    startNewGame,
     currentGame,
   };
 };

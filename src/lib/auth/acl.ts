@@ -11,11 +11,17 @@ export const getTokenFromRequest = (req: NextApiRequest): string | null => {
   return token;
 };
 
-export const authenticateUser = (req: NextApiRequest): PublicUser | null => {
+export const authenticateUserFromToken = (token: string): PublicUser | null => {
+  return verifyToken(token);
+};
+
+export const authenticateUserFromRequest = (
+  req: NextApiRequest,
+): PublicUser | null => {
   const token = getTokenFromRequest(req);
   if (!token) {
     return null;
   }
 
-  return verifyToken(token);
+  return authenticateUserFromToken(token);
 };

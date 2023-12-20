@@ -6,17 +6,33 @@ export enum GameEvents {
   NEW_GAME_STARTED = "new-game-started",
 }
 
-export type BasicUserEventPayload = {
-  user: Pick<PublicUser, "uuid">;
+export type JwtAccessToken = {
+  jwtAccessToken: string;
 };
 
 export type ReadyToPlayEvent = {
   type: GameEvents.READY_TO_PLAY;
-} & BasicUserEventPayload;
+};
+
+export const isReadyToPlayEvent = (event: any): event is ReadyToPlayEvent => {
+  return event.type === GameEvents.READY_TO_PLAY;
+};
 
 export type NewGameStartedEvent = {
   type: GameEvents.NEW_GAME_STARTED;
   game: GameDto;
 };
 
-export type GameEventPayload = ReadyToPlayEvent | NewGameStartedEvent;
+export type GameEventPayload = (ReadyToPlayEvent | NewGameStartedEvent) &
+  JwtAccessToken;
+
+export type UserEventPayload = {
+  user: PublicUser;
+  socketId: string;
+};
+
+export type UserGameEventPayload = Omit<
+  GameEventPayload,
+  keyof JwtAccessToken
+> &
+  UserEventPayload;

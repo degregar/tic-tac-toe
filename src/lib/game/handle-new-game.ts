@@ -1,6 +1,10 @@
 import { Socket } from "socket.io";
 import { v4 as uuidv4 } from "uuid";
-import { GameEvents, ReadyToPlayEvent } from "@/lib/game/events";
+import {
+  GameEvents,
+  ReadyToPlayEvent,
+  UserEventPayload,
+} from "@/lib/game/events";
 import {
   addToQueue,
   getAnotherUserFromQueue,
@@ -11,7 +15,7 @@ import { GameDto } from "@/lib/game/types";
 import { SocketEvent } from "@/lib/game/game-event-handler";
 
 export const handleNewGame = (
-  data: ReadyToPlayEvent & { socketId: string },
+  data: ReadyToPlayEvent & UserEventPayload,
 ): SocketEvent[] => {
   if (!isInQueue(data.user)) {
     addToQueue(data.user, data.socketId);

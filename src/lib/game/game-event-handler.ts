@@ -1,4 +1,4 @@
-import { GameEventPayload, GameEvents } from "@/lib/game/events";
+import { isReadyToPlayEvent, UserGameEventPayload } from "@/lib/game/events";
 import { handleNewGame } from "@/lib/game/handle-new-game";
 
 export type SocketEvent = {
@@ -8,13 +8,13 @@ export type SocketEvent = {
 };
 
 export const gameEventHandler = (
-  payload: GameEventPayload & { socketId: string },
+  payload: UserGameEventPayload,
 ): SocketEvent[] => {
-  if (payload.type === GameEvents.READY_TO_PLAY) {
+  if (isReadyToPlayEvent(payload)) {
     return handleNewGame(payload);
-  } else {
-    console.warn("unknown event", payload);
   }
+
+  console.warn("unknown event", payload);
 
   return [];
 };
