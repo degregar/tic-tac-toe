@@ -4,11 +4,64 @@ import React, { useEffect } from "react";
 import { SecuredLayout } from "@/components/layouts/SecuredLayout";
 import { useGame } from "@/lib/hooks/useGame";
 import { GameStates } from "@/lib/game/game-states";
+import { GameDto } from "@/lib/game/types";
+
+type BoardProps = {
+  board: GameDto["board"];
+  onMakeMove: (coords: [number, number]) => void;
+  isMyTurn: boolean;
+};
+const Board = ({ board, onMakeMove, isMyTurn }: BoardProps) => {
+  const renderCell = (coords: [number, number]) => {
+    const cell = board[coords[0]][coords[1]];
+
+    if (cell === null) {
+      return (
+        <div
+          className={`w-16 h-16 border border-gray-300 ${
+            isMyTurn ? "cursor-pointer hover:bg-gray-100" : "cursor-not-allowed"
+          }`}
+          onClick={() => onMakeMove(coords)}
+        />
+      );
+    }
+
+    return (
+      <div
+        className={
+          "w-16 h-16 border border-gray-300 flex justify-center items-center"
+        }
+      >
+        {cell}
+      </div>
+    );
+  };
+
+  return (
+    <div className={"grid grid-cols-[64px_64px_64px]"}>
+      {board.map((row, rowIndex) => (
+        <div className={"grid grid-rows-[64px_64px_64px] gap-0"} key={rowIndex}>
+          {row.map((cell, cellIndex) => (
+            <div className={"w-min grow-0"} key={cellIndex}>
+              {renderCell([rowIndex, cellIndex])}
+            </div>
+          ))}
+        </div>
+      ))}
+    </div>
+  );
+};
 
 const Game = () => {
-  const { isConnected, fetchStatus, currentGameState, startNewGame } =
-    useGame();
-  console.log("currentGameState", currentGameState);
+  const {
+    isConnected,
+    fetchStatus,
+    currentGameState,
+    startNewGame,
+    isMyTurn,
+    makeMove,
+  } = useGame();
+
   useEffect(() => {
     if (isConnected) {
       void fetchStatus();
@@ -24,7 +77,35 @@ const Game = () => {
   }
 
   if (currentGameState?.game) {
-    return <div>Nowa gra: {currentGameState.game.uuid}</div>;
+    const handleMakeMove = (coords: [number, number]) => {
+      if (isMyTurn) {
+        void makeMove(coords);
+      }
+    };
+
+    return (
+      <div className={"flex flex-col gap-4"}>
+        <div className={"text-center"}>
+          <span className={"text-xs text-gray-800"}>
+            {isMyTurn ? "Twoja kolej" : "Oczekiwanie na ruch przeciwnika"}
+          </span>
+        </div>
+
+        <div className={"flex justify-center mt-4"}>
+          <Board
+            board={currentGameState.game.board}
+            onMakeMove={handleMakeMove}
+            isMyTurn={isMyTurn}
+          />
+        </div>
+
+        <div className={"text-center"}>
+          <span className={"text-xs text-gray-100"}>
+            Gra: {currentGameState.game.uuid}
+          </span>
+        </div>
+      </div>
+    );
   }
 
   if (currentGameState?.status === GameStates.USER_IN_LOBBY) {
@@ -53,7 +134,7 @@ const Game = () => {
 const StartPage = () => {
   return (
     <div className="flex justify-center items-center h-screen bg-cyan-50">
-      <div className="w-full max-w-xs">
+      <div className="w-full max-w-md">
         <h1 className="text-center text-2xl font-semibold mb-6 text-cyan-800">
           Tic-Tac-Toe
         </h1>

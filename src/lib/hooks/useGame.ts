@@ -32,7 +32,6 @@ export const useGame = () => {
   }, []);
 
   const fetchStatus = async () => {
-    console.debug("Fetching game status...");
     emit({ type: GameEvents.CURRENT_STATUS_REQUESTED });
   };
 
@@ -44,10 +43,26 @@ export const useGame = () => {
     emit({ type: GameEvents.NEW_MATCH_REQUESTED });
   };
 
+  const makeMove = async (move: [number, number]) => {
+    if (!user || !gameState?.game?.uuid) {
+      return;
+    }
+
+    emit({ type: GameEvents.MOVE_MADE, move, gameId: gameState?.game?.uuid });
+  };
+
+  const isMyTurn =
+    (gameState?.game?.turn === "X" &&
+      gameState?.game?.playerXUuid === user?.uuid) ||
+    (gameState?.game?.turn === "O" &&
+      gameState?.game?.playerOUuid === user?.uuid);
+
   return {
     isConnected,
     fetchStatus,
     startNewGame,
     currentGameState: gameState,
+    isMyTurn,
+    makeMove,
   };
 };

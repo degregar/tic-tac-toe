@@ -22,7 +22,6 @@ type NextApiResponseWithSocket = NextApiResponse & {
 
 const onGameEvent =
   (socket: Socket, io: Server) => async (event: GameEvent & JwtAccessToken) => {
-    console.log("Received event", event);
     const user = authenticateUserFromToken(event.jwtAccessToken);
 
     if (!user) {
