@@ -35,19 +35,19 @@ const LoginPage = () => {
     <div className="flex justify-center items-center h-screen bg-cyan-50">
       <div className="w-full max-w-xs">
         <h1 className="text-center text-2xl font-semibold mb-6 text-cyan-800">
-          Zaloguj się
+          Log in
         </h1>
 
         <div className="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4">
           {isLoggingIn && (
             <div className={"flex flex-col items-center justify-center gap-4"}>
-              <span>Trwa logowanie</span>
+              <span>Logging in...</span>
               <Spinner />
             </div>
           )}
           {isAuthenticated && (
             <p className="text-center text-gray-500 text-sm">
-              Zalogowano pomyślnie. Przekierowywanie...
+              Logged in. Redirecting...
             </p>
           )}
         </div>

@@ -23,24 +23,24 @@ export const Game = () => {
   }, [isConnected]);
 
   if (!isConnected) {
-    return <div>Łączenie z serwerem...</div>;
+    return <div>Connecting to the game server...</div>;
   }
 
   if (currentGameState === null) {
-    return <div>Ładowanie...</div>;
+    return <div>Loading...</div>;
   }
 
   if (isGameFinished && currentGameState.game) {
     const gameState =
       currentGameState.game.winnerUuid === user?.uuid
-        ? "Wygrałeś! 💪"
-        : "Przegrałeś 😔";
+        ? "You won! 💪"
+        : "You lost 😔";
 
     return (
       <div className={"flex flex-col gap-4"}>
         <div className={"text-center"}>
           <span className={"text-xs text-gray-800"}>
-            {currentGameState.game.winnerUuid ? gameState : "Remis"}
+            {currentGameState.game.winnerUuid ? gameState : "Draw"}
           </span>
         </div>
 
@@ -52,14 +52,7 @@ export const Game = () => {
           />
         </div>
 
-        <div
-          className={
-            "bg-cyan-700 hover:bg-cyan-800 text-white text-center font-bold py-2 px-4 rounded cursor-pointer mt-4"
-          }
-          onClick={startNewGame}
-        >
-          Zacznij nową grę
-        </div>
+        <StartNewGameButton startNewGame={startNewGame} />
       </div>
     );
   }
@@ -75,7 +68,7 @@ export const Game = () => {
       <div className={"flex flex-col gap-4"}>
         <div className={"text-center"}>
           <span className={"text-xs text-gray-800"}>
-            {isMyTurn ? "Twoja kolej" : "Oczekiwanie na ruch przeciwnika"} (
+            {isMyTurn ? "Your turn" : "Waiting for the opponent"} (
             {currentGameState.game.turn})
           </span>
         </div>
@@ -90,7 +83,7 @@ export const Game = () => {
 
         <div className={"text-center"}>
           <span className={"text-xs text-gray-100"}>
-            Gra: {currentGameState.game.uuid}
+            Game: {currentGameState.game.uuid}
           </span>
         </div>
       </div>
@@ -100,22 +93,31 @@ export const Game = () => {
   if (currentGameState?.status === GameStates.USER_IN_LOBBY) {
     return (
       <div>
-        <span>Podłączono do serwera</span>
-        <div
-          className={
-            "bg-cyan-700 hover:bg-cyan-800 text-white text-center font-bold py-2 px-4 rounded cursor-pointer mt-4"
-          }
-          onClick={startNewGame}
-        >
-          Zacznij nową grę
-        </div>
+        <span>Connected to the game server</span>
+        <StartNewGameButton startNewGame={startNewGame} />
       </div>
     );
   }
 
   if (currentGameState?.status === GameStates.WAITING_FOR_PLAYERS) {
-    return <div>Oczekiwanie na graczy...</div>;
+    return <div>Waiting for the opponent...</div>;
   }
 
-  return <div>Wystąpił błąd</div>;
+  return <div>Error occured. Please refresh or try again later.</div>;
+};
+
+type StartNewGameButtonProps = {
+  startNewGame: () => void;
+};
+const StartNewGameButton = ({ startNewGame }: StartNewGameButtonProps) => {
+  return (
+    <div
+      className={
+        "bg-cyan-700 hover:bg-cyan-800 text-white text-center font-bold py-2 px-4 rounded cursor-pointer mt-4"
+      }
+      onClick={startNewGame}
+    >
+      Start a new game
+    </div>
+  );
 };
