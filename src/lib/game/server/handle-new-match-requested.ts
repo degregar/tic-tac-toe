@@ -1,18 +1,18 @@
 import {
-  CurrentStatusRequestedEvent,
   GameEvent,
   GameEvents,
+  NewMatchRequestedEvent,
 } from "@/lib/game/game-events";
-import { GameStates } from "@/lib/game/game-states";
 import { PublicUser } from "@/lib/user/types";
+import { GameStates } from "@/lib/game/game-states";
 
-export const handleCurrentStatusRequested = async (
-  data: CurrentStatusRequestedEvent & { user: PublicUser },
+export const handleNewMatchRequestedEvent = async (
+  data: NewMatchRequestedEvent & { user: PublicUser },
 ): Promise<GameEvent[]> => {
   const event: GameEvent = {
     type: GameEvents.CURRENT_STATUS_UPDATED,
     state: {
-      status: GameStates.USER_IN_LOBBY,
+      status: GameStates.WAITING_FOR_PLAYERS,
     },
     recipient: data.user,
   };

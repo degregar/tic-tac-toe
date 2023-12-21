@@ -1,9 +1,8 @@
 import { resolveSocketEvents } from "@/lib/game/server/socket-events-resolver";
-import { GameEvents } from "@/lib/game/events";
 import { GameStates } from "@/lib/game/game-states";
 import { SocketEvents } from "@/lib/socket/types";
 import { SocketEvent } from "@/lib/game/server/game-events-resolver";
-import { CurrentStatusUpdatedEvent } from "@/lib/game/game-events";
+import { CurrentStatusUpdatedEvent, GameEvents } from "@/lib/game/game-events";
 import { storeSocketId } from "@/lib/game/server/users-sockets";
 
 const testUser = {
