@@ -48,8 +48,12 @@ const isFieldOccupied = (game: GameDto, move: [number, number]): boolean => {
   return game.board[move[0]][move[1]] !== null;
 };
 
+const isEveryFieldOccupied = (game: GameDto): boolean => {
+  return game.board.every((row) => row.every((field) => field !== null));
+};
+
 export const isGameFinished = (game: GameDto): boolean => {
-  return !!game.winnerUuid;
+  return !!game.winnerUuid || isEveryFieldOccupied(game);
 };
 
 export const makeMove = async (
