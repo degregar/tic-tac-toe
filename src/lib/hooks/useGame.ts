@@ -1,14 +1,21 @@
 import { useAuth } from "@/lib/hooks/useAuth";
 import { useSocket } from "@/lib/hooks/useSocket";
-import { GameEvents } from "@/lib/game/events";
-import { useEffect } from "react";
-import { GameEvent } from "@/lib/game/game-events";
+import { useEffect, useState } from "react";
+import {
+  GameEvent,
+  GameEvents,
+  isCurrentStatusUpdatedEvent,
+} from "@/lib/game/game-events";
+import { GameState } from "@/lib/game/game-states";
 
 export const useGame = () => {
   const { user, token } = useAuth();
+  const [gameState, setGameState] = useState<GameState | null>(null);
 
   const handleGameEvent = (event: GameEvent) => {
-    console.log("new game event", event);
+    if (isCurrentStatusUpdatedEvent(event)) {
+      setGameState(event.state);
+    }
   };
 
   const { emit, connect, disconnect, isConnected } = useSocket(
@@ -34,13 +41,13 @@ export const useGame = () => {
       return;
     }
 
-    // @TODO Emit event to start new game
+    emit({ type: GameEvents.NEW_MATCH_REQUESTED });
   };
 
   return {
     isConnected,
     fetchStatus,
     startNewGame,
-    currentGame: null,
+    currentGameState: gameState,
   };
 };
