@@ -14,17 +14,17 @@ const testEvent: CurrentStatusRequestedEvent & { user: PublicUser } = {
 };
 
 describe("handleCurrentStatusRequested", () => {
-  it("should return an array with a single event", () => {
+  it("should return an array with a single event", async () => {
     // when
-    const events = handleCurrentStatusRequested(testEvent);
+    const events = await handleCurrentStatusRequested(testEvent);
 
     // then
     expect(events).toHaveLength(1);
   });
 
-  it("should return current status updated event", () => {
+  it("should return current status updated event", async () => {
     // when
-    const events = handleCurrentStatusRequested(testEvent);
+    const events = await handleCurrentStatusRequested(testEvent);
 
     // then
     expect(events[0].type).toEqual(GameEvents.CURRENT_STATUS_UPDATED);
