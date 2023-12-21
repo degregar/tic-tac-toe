@@ -2,15 +2,17 @@ import { GameState } from "@/lib/game/game-states";
 
 const usersGameStates = new Map<string, GameState>();
 
-export const storeUserGameState = (userId: string, state: GameState) => {
+export const storeUserGameState = async (userId: string, state: GameState) => {
   usersGameStates.set(userId, state);
 };
 
-export const getUserGameState = (userId: string): GameState | undefined => {
+export const getUserGameState = async (
+  userId: string,
+): Promise<GameState | undefined> => {
   return usersGameStates.get(userId);
 };
 
-export const removeUserGameState = (userId: string) => {
+export const removeUserGameState = async (userId: string) => {
   usersGameStates.delete(userId);
 };
 

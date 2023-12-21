@@ -3,17 +3,24 @@ import {
   CurrentStatusRequestedEvent,
   CurrentStatusUpdatedEvent,
   GameEvents,
+  MoveMadeEvent,
   NewMatchRequestedEvent,
 } from "@/lib/game/game-events";
 import { PublicUser } from "@/lib/user/types";
 import { GameStates } from "@/lib/game/game-states";
+import { createTestGameUsingEvents } from "@/lib/game/server/game-test-utils";
 
-const testUser = {
+const playerX = {
   uuid: "1234",
 };
+
+const playerO = {
+  uuid: "5678",
+};
+
 const currentStatusEvent: CurrentStatusRequestedEvent & { user: PublicUser } = {
   type: GameEvents.CURRENT_STATUS_REQUESTED,
-  user: testUser,
+  user: playerX,
 };
 
 describe("resolve game events", () => {
@@ -34,14 +41,14 @@ describe("resolve game events", () => {
     // then
     expect(events[0].type).toEqual(GameEvents.CURRENT_STATUS_UPDATED);
     expect(events[0].state.status).toEqual(GameStates.USER_IN_LOBBY);
-    expect(events[0].recipient).toEqual(testUser);
+    expect(events[0].recipient).toEqual(playerX);
   });
 
   it("should return game state WAITING_FOR_PLAYERS after event NEW_MATCH_REQUESTED", async () => {
     // given
     const newMatchEvent: NewMatchRequestedEvent & { user: PublicUser } = {
       type: GameEvents.NEW_MATCH_REQUESTED,
-      user: testUser,
+      user: playerX,
     };
 
     // when
@@ -67,14 +74,11 @@ describe("resolve game events", () => {
     // given
     const newMatchEvent: NewMatchRequestedEvent & { user: PublicUser } = {
       type: GameEvents.NEW_MATCH_REQUESTED,
-      user: testUser,
-    };
-    const testUser2 = {
-      uuid: "5678",
+      user: playerX,
     };
     const newMatchEvent2: NewMatchRequestedEvent & { user: PublicUser } = {
       type: GameEvents.NEW_MATCH_REQUESTED,
-      user: testUser2,
+      user: playerO,
     };
 
     // when
@@ -90,5 +94,39 @@ describe("resolve game events", () => {
 
     expect(inProgressEvents[1].type).toEqual(GameEvents.CURRENT_STATUS_UPDATED);
     expect(inProgressEvents[1].state.status).toEqual(GameStates.PLAYING);
+  });
+
+  it("should return game state with one move after event MOVE_MADE", async () => {
+    await createTestGameUsingEvents(playerX, playerO);
+
+    const currentGameStatusEvent: CurrentStatusRequestedEvent & {
+      user: PublicUser;
+    } = {
+      type: GameEvents.CURRENT_STATUS_REQUESTED,
+      user: playerX,
+    };
+    const currentGameState = (await resolveGameEvents(
+      currentGameStatusEvent,
+    )) as [CurrentStatusUpdatedEvent];
+
+    if (!currentGameState[0].state.game) {
+      throw new Error("Game state is not defined");
+    }
+
+    const moveMadeEvent: MoveMadeEvent & { user: PublicUser } = {
+      type: GameEvents.MOVE_MADE,
+      user: playerO,
+      move: [0, 0],
+      gameId: currentGameState[0].state.game.uuid,
+    };
+
+    const inProgressEvents = (await resolveGameEvents(moveMadeEvent)) as [
+      CurrentStatusUpdatedEvent,
+      CurrentStatusUpdatedEvent,
+    ];
+
+    // then
+    expect(inProgressEvents).toHaveLength(2);
+    expect(inProgressEvents[0].state.game?.turn).toEqual("O");
   });
 });

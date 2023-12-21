@@ -1,6 +1,8 @@
 export type GameDto = {
   uuid: string;
-  playerXUuid: string | null;
-  playerOUuid: string | null;
+  playerXUuid: string;
+  playerOUuid: string;
   winnerUuid: string | null;
+  turn: "X" | "O";
+  board: Array<Array<"X" | "O" | null>>;
 };

@@ -7,12 +7,12 @@ import { PublicUser } from "@/lib/user/types";
 import { GameStates } from "@/lib/game/game-states";
 import { storeUserGameState } from "@/lib/game/server/users-game-states";
 import { findOpponent } from "@/lib/game/server/find-opponent";
-import { createGame } from "@/lib/game/server/create-game";
+import { createGame } from "@/lib/game/server/game-controller";
 
 export const handleNewMatchRequestedEvent = async (
   data: NewMatchRequestedEvent & { user: PublicUser },
 ): Promise<GameEvent[]> => {
-  storeUserGameState(data.user.uuid, {
+  await storeUserGameState(data.user.uuid, {
     status: GameStates.WAITING_FOR_PLAYERS,
     game: null,
   });
@@ -22,11 +22,11 @@ export const handleNewMatchRequestedEvent = async (
   if (opponent) {
     const game = await createGame(data.user.uuid, opponent.user.uuid);
 
-    storeUserGameState(opponent.user.uuid, {
+    await storeUserGameState(opponent.user.uuid, {
       status: GameStates.PLAYING,
       game,
     });
-    storeUserGameState(data.user.uuid, {
+    await storeUserGameState(data.user.uuid, {
       status: GameStates.PLAYING,
       game,
     });

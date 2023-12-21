@@ -7,7 +7,6 @@ export enum GameEvents {
   NEW_MATCH_REQUESTED = "new-match-requested", // sent by the player who wants to start a new match
   PARTNER_ASSIGNED = "partner-assigned", // sent by the server to the player who requested a new match
   MATCH_READINESS_CONFIRMED = "match-readiness-confirmed", // sent by the player who confirmed their readiness to play
-  MATCH_STARTED = "match-started", // sent by the server to both players when the match starts
   MOVE_MADE = "move-made", // sent by the player who made a move
   MATCH_FINISHED = "match-finished", // sent by the server to both players when the match finishes
 }
@@ -53,7 +52,18 @@ export const isNewMatchRequestedEvent = (
   return event.type === GameEvents.NEW_MATCH_REQUESTED;
 };
 
+export type MoveMadeEvent = {
+  type: GameEvents.MOVE_MADE;
+  gameId: string;
+  move: [number, number];
+};
+
+export const isMoveMadeEvent = (event: GameEvent): event is MoveMadeEvent => {
+  return event.type === GameEvents.MOVE_MADE;
+};
+
 export type GameEvent =
   | CurrentStatusRequestedEvent
   | CurrentStatusUpdatedEvent
-  | NewMatchRequestedEvent;
+  | NewMatchRequestedEvent
+  | MoveMadeEvent;
