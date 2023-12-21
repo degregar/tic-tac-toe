@@ -159,4 +159,66 @@ describe("Game Controller", () => {
     // then
     await expect(makeMovePromise).rejects.toThrow("Not your turn!");
   });
+
+  it("should return player X as a winner", async () => {
+    // given
+    const game = await createGame(playerX.uuid, playerO.uuid);
+
+    // when
+    const updatedGame = await makeMove(game, playerX.uuid, [0, 0]);
+    const updatedGame2 = await makeMove(updatedGame, playerO.uuid, [1, 0]);
+    const updatedGame3 = await makeMove(updatedGame2, playerX.uuid, [0, 1]);
+    const updatedGame4 = await makeMove(updatedGame3, playerO.uuid, [1, 1]);
+    const updatedGame5 = await makeMove(updatedGame4, playerX.uuid, [0, 2]);
+
+    // then
+    expect(updatedGame5.winnerUuid).toEqual(playerX.uuid);
+  });
+
+  it("should return player O as a winner", async () => {
+    // given
+    const game = await createGame(playerX.uuid, playerO.uuid);
+
+    // when
+    const updatedGame = await makeMove(game, playerX.uuid, [1, 0]);
+    const updatedGame2 = await makeMove(updatedGame, playerO.uuid, [0, 0]);
+    const updatedGame3 = await makeMove(updatedGame2, playerX.uuid, [1, 1]);
+    const updatedGame4 = await makeMove(updatedGame3, playerO.uuid, [0, 1]);
+    const updatedGame5 = await makeMove(updatedGame4, playerX.uuid, [2, 2]);
+    const updatedGame6 = await makeMove(updatedGame5, playerO.uuid, [0, 2]);
+
+    // then
+    expect(updatedGame6.winnerUuid).toEqual(playerO.uuid);
+  });
+
+  it("should return null as a winner when game is not finished", async () => {
+    // given
+    const game = await createGame(playerX.uuid, playerO.uuid);
+
+    // when
+    const updatedGame = await makeMove(game, playerX.uuid, [1, 0]);
+    const updatedGame2 = await makeMove(updatedGame, playerO.uuid, [0, 0]);
+    const updatedGame3 = await makeMove(updatedGame2, playerX.uuid, [1, 1]);
+    const updatedGame4 = await makeMove(updatedGame3, playerO.uuid, [0, 1]);
+
+    // then
+    expect(updatedGame4.winnerUuid).toEqual(null);
+  });
+
+  it("should not allow to make a move when game is finished", async () => {
+    // given
+    const game = await createGame(playerX.uuid, playerO.uuid);
+
+    // when
+    const updatedGame = await makeMove(game, playerX.uuid, [1, 0]);
+    const updatedGame2 = await makeMove(updatedGame, playerO.uuid, [0, 0]);
+    const updatedGame3 = await makeMove(updatedGame2, playerX.uuid, [1, 1]);
+    const updatedGame4 = await makeMove(updatedGame3, playerO.uuid, [0, 1]);
+    const updatedGame5 = await makeMove(updatedGame4, playerX.uuid, [2, 2]);
+    const updatedGame6 = await makeMove(updatedGame5, playerO.uuid, [0, 2]);
+    const makeMovePromise = makeMove(updatedGame6, playerX.uuid, [2, 1]);
+
+    // then
+    await expect(makeMovePromise).rejects.toThrow("Game is finished!");
+  });
 });

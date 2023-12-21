@@ -5,7 +5,11 @@ import {
   MoveMadeEvent,
 } from "@/lib/game/game-events";
 import { PublicUser } from "@/lib/user/types";
-import { getGame, makeMove } from "@/lib/game/server/game-controller";
+import {
+  getGame,
+  isGameFinished,
+  makeMove,
+} from "@/lib/game/server/game-controller";
 import { GameDto } from "@/lib/game/types";
 import { GameStates } from "@/lib/game/game-states";
 import {
@@ -33,15 +37,19 @@ export const handleMoveMadeEvent = async (
     throw new Error("Players' game states not found");
   }
 
+  const status = isGameFinished(updatedGame)
+    ? GameStates.FINISHED
+    : GameStates.PLAYING;
+
   const playerXGameState = {
     ...currentPlayerXGameState,
     game: updatedGame,
-    status: GameStates.PLAYING,
+    status,
   };
   const playerOGameState = {
     ...currentPlayerOGameState,
     game: updatedGame,
-    status: GameStates.PLAYING,
+    status,
   };
 
   await storeUserGameState(updatedGame.playerXUuid, playerXGameState);

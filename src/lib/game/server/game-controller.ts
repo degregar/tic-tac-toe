@@ -1,5 +1,6 @@
 import { GameDto } from "@/lib/game/types";
 import { v4 as uuidv4 } from "uuid";
+import { GameStates } from "@/lib/game/game-states";
 
 const games = new Map<string, GameDto>();
 
@@ -47,6 +48,10 @@ const isFieldOccupied = (game: GameDto, move: [number, number]): boolean => {
   return game.board[move[0]][move[1]] !== null;
 };
 
+export const isGameFinished = (game: GameDto): boolean => {
+  return !!game.winnerUuid;
+};
+
 export const makeMove = async (
   game: GameDto,
   playerUuid: string,
@@ -64,6 +69,10 @@ export const makeMove = async (
     throw new Error("Field occupied!");
   }
 
+  if (isGameFinished(game)) {
+    throw new Error("Game is finished!");
+  }
+
   game.board[move[0]][move[1]] = game.turn;
 
   const updatedGame: GameDto = {
@@ -71,7 +80,47 @@ export const makeMove = async (
     turn: game.turn === "X" ? "O" : "X",
   };
 
+  const winner = await getGameWinner(game);
+  if (winner) {
+    updatedGame.winnerUuid =
+      winner === "X" ? game.playerXUuid : game.playerOUuid;
+  }
+
   await saveGame(updatedGame);
 
   return updatedGame;
+};
+
+export const getGameWinner = async (
+  game: GameDto,
+): Promise<GameDto["turn"] | null> => {
+  const board = game.board;
+
+  const winningCombinations = [
+    // rows
+    [board[0][0], board[0][1], board[0][2]],
+    [board[1][0], board[1][1], board[1][2]],
+    [board[2][0], board[2][1], board[2][2]],
+
+    // columns
+    [board[0][0], board[1][0], board[2][0]],
+    [board[0][1], board[1][1], board[2][1]],
+    [board[0][2], board[1][2], board[2][2]],
+
+    // diagonals
+    [board[0][0], board[1][1], board[2][2]],
+    [board[2][0], board[1][1], board[0][2]],
+  ];
+
+  for (const combination of winningCombinations) {
+    if (
+      combination[0] !== null &&
+      combination[0] === combination[1] &&
+      combination[1] === combination[2]
+    ) {
+      return combination[0];
+    }
+  }
+
+  return null;
 };
