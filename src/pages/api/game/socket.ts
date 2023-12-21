@@ -1,18 +1,16 @@
 import { Server, ServerOptions, Socket } from "socket.io";
 import { NextApiRequest, NextApiResponse } from "next";
 import { JwtAccessToken, SocketEvents } from "@/lib/socket/types";
-import {
-  GameEventPayload,
-  GameEvents,
-  UserGameEventPayload,
-} from "@/lib/game/events";
-import { gameEventsResolver } from "@/lib/game/server/game-events-resolver";
+import { resolveGameEvents } from "@/lib/game/server/game-events-resolver";
 import {
   authenticateUserFromRequest,
   authenticateUserFromToken,
 } from "@/lib/auth/acl";
 import { StatusCodes } from "http-status-codes";
 import { GameEvent } from "@/lib/game/game-events";
+import { resolveSocketEvents } from "@/lib/game/server/socket-events-resolver";
+import { PublicUser } from "@/lib/user/types";
+import { storeSocketId } from "@/lib/game/server/users-sockets";
 
 type NextApiResponseWithSocket = NextApiResponse & {
   socket: {
@@ -23,7 +21,7 @@ type NextApiResponseWithSocket = NextApiResponse & {
 };
 
 const onGameEvent =
-  (socket: Socket, io: Server) => (event: GameEvent & JwtAccessToken) => {
+  (socket: Socket, io: Server) => async (event: GameEvent & JwtAccessToken) => {
     const user = authenticateUserFromToken(event.jwtAccessToken);
 
     if (!user) {
@@ -31,15 +29,25 @@ const onGameEvent =
       return;
     }
 
-    const data: UserGameEventPayload = {
+    storeSocketId(user.uuid, socket.id);
+
+    const gameWithUserEvent: GameEvent & { user: PublicUser } = {
       ...event,
       user,
     };
 
-    const events = gameEventsResolver(data);
-    events.forEach((event) => {
-      io.to(event.socketId).emit(event.type, event.data);
-    });
+    try {
+      const gameEvents: GameEvent[] =
+        await resolveGameEvents(gameWithUserEvent);
+
+      const events = await resolveSocketEvents(gameEvents);
+      events.forEach((event) => {
+        io.to(event.socketId).emit(event.type, event.payload);
+      });
+    } catch (error) {
+      // @TODO: handle error, maybe send something back to the client
+      console.error(error);
+    }
   };
 
 const onConnectionEvent = (io: Server) => (socket: Socket) => {
