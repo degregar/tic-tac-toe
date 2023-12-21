@@ -12,12 +12,14 @@ export const handleNewMatchRequestedEvent = async (
 ): Promise<GameEvent[]> => {
   storeUserGameState(data.user.uuid, {
     status: GameStates.WAITING_FOR_PLAYERS,
+    game: null,
   });
 
   const event: GameEvent = {
     type: GameEvents.CURRENT_STATUS_UPDATED,
     state: {
       status: GameStates.WAITING_FOR_PLAYERS,
+      game: null,
     },
     recipient: data.user,
   };
