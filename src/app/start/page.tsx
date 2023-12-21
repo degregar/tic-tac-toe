@@ -5,11 +5,11 @@ import { SecuredLayout } from "@/components/layouts/SecuredLayout";
 import { useGame } from "@/lib/hooks/useGame";
 
 const StartPage = () => {
-  const { isConnected, startNewGame, currentGame } = useGame();
+  const { isConnected, fetchStatus, currentGame } = useGame();
 
   useEffect(() => {
     if (isConnected) {
-      void startNewGame();
+      void fetchStatus();
     }
   }, [isConnected]);
 

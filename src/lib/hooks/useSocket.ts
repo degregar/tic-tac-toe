@@ -2,16 +2,16 @@ import { useCallback, useState } from "react";
 import { io, Socket } from "socket.io-client";
 import { securedAxios } from "@/lib/auth/axios";
 import { GameDto } from "@/lib/game/types";
-import { SocketEvents } from "@/lib/socket/types";
-import {
-  JwtAccessToken,
-  GameEventPayload,
-  GameEvents,
-} from "@/lib/game/events";
+import { JwtAccessToken, SocketEvents } from "@/lib/socket/types";
+import { GameEvent } from "@/lib/game/game-events";
 
-export const useSocket = (token: string | null) => {
+export const useSocket = (
+  token: string | null,
+  onGameEvent: (event: GameEvent) => void,
+) => {
   const [connection, setConnection] = useState<Socket | null>(null);
   const [currentGame, setCurrentGame] = useState<GameDto | null>(null);
+  const [gameEvent, setGameEvent] = useState<GameEvent | null>(null);
 
   const connect = useCallback(async () => {
     if (!token) {
@@ -37,9 +37,8 @@ export const useSocket = (token: string | null) => {
   }, []);
 
   if (connection) {
-    connection.on(GameEvents.NEW_GAME_STARTED, (data: GameDto) => {
-      console.debug("New game started", data);
-      setCurrentGame(data);
+    connection.on(SocketEvents.GAME_EVENT, (event: GameEvent) => {
+      onGameEvent(event);
     });
   }
 
@@ -48,11 +47,17 @@ export const useSocket = (token: string | null) => {
     setConnection(null);
   };
 
-  const emit = (event: Omit<GameEventPayload, keyof JwtAccessToken>) => {
-    connection?.emit(SocketEvents.GAME_EVENT, {
-      jwtAccessToken: token,
+  const emit = (event: GameEvent) => {
+    if (!token) {
+      console.warn("No token provided. Won't emit event.");
+      return;
+    }
+
+    const richEvent: GameEvent & JwtAccessToken = {
       ...event,
-    });
+      jwtAccessToken: token,
+    };
+    connection?.emit(SocketEvents.GAME_EVENT, richEvent);
   };
 
   return {

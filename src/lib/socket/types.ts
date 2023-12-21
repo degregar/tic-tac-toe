@@ -4,3 +4,7 @@ export enum SocketEvents {
   DISCONNECT = "disconnect",
   GAME_EVENT = "game-event",
 }
+
+export type JwtAccessToken = {
+  jwtAccessToken: string;
+};

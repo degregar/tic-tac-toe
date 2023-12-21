@@ -1,13 +1,18 @@
 import { Server, ServerOptions, Socket } from "socket.io";
 import { NextApiRequest, NextApiResponse } from "next";
-import { SocketEvents } from "@/lib/socket/types";
-import { GameEventPayload, UserGameEventPayload } from "@/lib/game/events";
-import { gameEventHandler } from "@/lib/game/game-event-handler";
+import { JwtAccessToken, SocketEvents } from "@/lib/socket/types";
+import {
+  GameEventPayload,
+  GameEvents,
+  UserGameEventPayload,
+} from "@/lib/game/events";
+import { gameEventsResolver } from "@/lib/game/server/game-events-resolver";
 import {
   authenticateUserFromRequest,
   authenticateUserFromToken,
 } from "@/lib/auth/acl";
 import { StatusCodes } from "http-status-codes";
+import { GameEvent } from "@/lib/game/game-events";
 
 type NextApiResponseWithSocket = NextApiResponse & {
   socket: {
@@ -18,21 +23,20 @@ type NextApiResponseWithSocket = NextApiResponse & {
 };
 
 const onGameEvent =
-  (socket: Socket, io: Server) => (payload: GameEventPayload) => {
-    const user = authenticateUserFromToken(payload.jwtAccessToken);
+  (socket: Socket, io: Server) => (event: GameEvent & JwtAccessToken) => {
+    const user = authenticateUserFromToken(event.jwtAccessToken);
 
     if (!user) {
-      console.warn("Unauthorized user tried to emit event", payload);
+      console.warn("Unauthorized user tried to emit event", event);
       return;
     }
 
     const data: UserGameEventPayload = {
-      ...payload,
+      ...event,
       user,
-      socketId: socket.id,
     };
 
-    const events = gameEventHandler(data);
+    const events = gameEventsResolver(data);
     events.forEach((event) => {
       io.to(event.socketId).emit(event.type, event.data);
     });
