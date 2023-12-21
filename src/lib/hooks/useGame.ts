@@ -6,7 +6,7 @@ import {
   GameEvents,
   isCurrentStatusUpdatedEvent,
 } from "@/lib/game/game-events";
-import { GameState } from "@/lib/game/game-states";
+import { GameState, GameStates } from "@/lib/game/game-states";
 
 export const useGame = () => {
   const { user, token } = useAuth();
@@ -57,6 +57,8 @@ export const useGame = () => {
     (gameState?.game?.turn === "O" &&
       gameState?.game?.playerOUuid === user?.uuid);
 
+  const isGameFinished = gameState?.status === GameStates.FINISHED;
+
   return {
     isConnected,
     fetchStatus,
@@ -64,5 +66,6 @@ export const useGame = () => {
     currentGameState: gameState,
     isMyTurn,
     makeMove,
+    isGameFinished,
   };
 };
