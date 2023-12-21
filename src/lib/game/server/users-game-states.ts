@@ -13,3 +13,7 @@ export const getUserGameState = (userId: string): GameState | undefined => {
 export const removeUserGameState = (userId: string) => {
   usersGameStates.delete(userId);
 };
+
+export const getUsersGameStates = async (): Promise<Map<string, GameState>> => {
+  return usersGameStates;
+};

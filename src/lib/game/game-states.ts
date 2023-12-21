@@ -3,7 +3,7 @@ import { GameDto } from "@/lib/game/types";
 export enum GameStates {
   USER_IN_LOBBY = "user-in-lobby",
   WAITING_FOR_PLAYERS = "waiting-for-players",
-  IN_PROGRESS = "in-progress",
+  PLAYING = "playing",
   FINISHED = "finished",
 }
 

@@ -62,4 +62,33 @@ describe("resolve game events", () => {
       GameStates.WAITING_FOR_PLAYERS,
     );
   });
+
+  it("should return game state PLAYING when two users got matched", async () => {
+    // given
+    const newMatchEvent: NewMatchRequestedEvent & { user: PublicUser } = {
+      type: GameEvents.NEW_MATCH_REQUESTED,
+      user: testUser,
+    };
+    const testUser2 = {
+      uuid: "5678",
+    };
+    const newMatchEvent2: NewMatchRequestedEvent & { user: PublicUser } = {
+      type: GameEvents.NEW_MATCH_REQUESTED,
+      user: testUser2,
+    };
+
+    // when
+    await resolveGameEvents(newMatchEvent);
+    const inProgressEvents = (await resolveGameEvents(newMatchEvent2)) as [
+      CurrentStatusUpdatedEvent,
+      CurrentStatusUpdatedEvent,
+    ];
+
+    // then
+    expect(inProgressEvents[0].type).toEqual(GameEvents.CURRENT_STATUS_UPDATED);
+    expect(inProgressEvents[0].state.status).toEqual(GameStates.PLAYING);
+
+    expect(inProgressEvents[1].type).toEqual(GameEvents.CURRENT_STATUS_UPDATED);
+    expect(inProgressEvents[1].state.status).toEqual(GameStates.PLAYING);
+  });
 });
