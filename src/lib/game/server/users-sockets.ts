@@ -11,5 +11,5 @@ export const getSocketId = async (userId: string): Promise<string | null> => {
 };
 
 export const removeSocketId = async (userId: string) => {
-  await redisClient.del(userId);
+  await redisClient.del(getRedisKey(userId));
 };

@@ -29,7 +29,7 @@ const onGameEvent =
       return;
     }
 
-    storeSocketId(user.uuid, socket.id);
+    await storeSocketId(user.uuid, socket.id);
 
     const gameWithUserEvent: GameEvent & { user: PublicUser } = {
       ...event,
