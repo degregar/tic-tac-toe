@@ -31,7 +31,7 @@ const GameRecord = ({ game }: { game: GameDto }) => {
 
           <div className="text-sm text-gray-500">Result</div>
           <div className="text-2xl text-gray-800">
-            {didIWin ? "WON" : "LOST"}
+            {game.winnerUuid !== null ? (didIWin ? "WON" : "LOST") : "DRAW"}
           </div>
         </div>
       </div>
