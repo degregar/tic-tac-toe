@@ -18,8 +18,9 @@ More information about the project can be found in the [TASK.md](TASK.md) file.
 You can use `adminer` to view the database at [http://localhost:8080](http://localhost:8080).
 
 ## Running tests
-
-Run `npm run test` to run the tests.
+1. Copy `.env.test.example` to `.env.test` and fill in the values.
+2. Run `docker-compose -f docker-compose.test.yml up -d` to start the databases.
+3. Run `npm run test` to run the tests.
 
 ## Architecture
 
