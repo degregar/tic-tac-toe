@@ -16,6 +16,7 @@ import {
   getUserGameState,
   storeUserGameState,
 } from "@/lib/game/server/users-game-states";
+import { storeGameResult } from "@/lib/game/server/matches-history";
 
 export const handleMoveMadeEvent = async (
   data: MoveMadeEvent & { user: PublicUser },
@@ -40,6 +41,10 @@ export const handleMoveMadeEvent = async (
   const status = isGameFinished(updatedGame)
     ? GameStates.FINISHED
     : GameStates.PLAYING;
+
+  if (status === GameStates.FINISHED) {
+    await storeGameResult(updatedGame);
+  }
 
   const playerXGameState = {
     ...currentPlayerXGameState,

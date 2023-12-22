@@ -6,6 +6,7 @@ services:
     ports:
       - 5433:5432
     volumes:
+      - ./postgres/init-scripts:/docker-entrypoint-initdb.d
       - ./data/postgres16_test:/var/lib/postgresql/data
     env_file:
       - ./.env.test
