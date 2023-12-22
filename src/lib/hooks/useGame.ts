@@ -15,7 +15,7 @@ import {
 } from "@/lib/errors/types";
 
 export const useGame = () => {
-  const { user, token } = useAuth();
+  const { user, getToken } = useAuth();
   const [gameState, setGameState] = useState<GameState | null>(null);
   const [error, setError] = useState<GameError | null>(null);
 
@@ -43,7 +43,7 @@ export const useGame = () => {
   };
 
   const { emit, connect, disconnect, isConnected } = useSocket(
-    token,
+    getToken(),
     handleGameEvent,
     handleConnectionError,
   );

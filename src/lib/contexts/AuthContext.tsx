@@ -4,7 +4,7 @@ import React, { createContext, useState, useEffect } from "react";
 import { jwtDecode } from "jwt-decode";
 import { PublicUser } from "@/lib/user/types";
 import { login, logout } from "@/lib/auth/auth";
-import { getAccessToken } from "@/lib/auth/local-jwt";
+import { getAccessToken, removeAccessToken } from "@/lib/auth/local-jwt";
 
 export const AuthContext = createContext<{
   isAuthenticated: boolean;
@@ -12,14 +12,14 @@ export const AuthContext = createContext<{
   logout: () => void;
   user: PublicUser | null;
   isSettled: boolean;
-  token: string | null;
+  getToken: () => string | null;
 }>({
   isAuthenticated: false,
   login: async () => {},
   logout: () => {},
   user: null,
   isSettled: false,
-  token: null,
+  getToken: () => null,
 });
 
 const getUserDataFromAccessToken = (accessToken: string): PublicUser | null => {
@@ -35,11 +35,9 @@ export const AuthProvider = ({ children }: { children: any }) => {
   const [user, setUser] = useState<PublicUser | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isSettled, setIsSettled] = useState(false);
-  const [token, setToken] = useState<string | null>(null);
 
   const init = async () => {
     const accessToken = getAccessToken();
-    setToken(accessToken);
 
     if (accessToken) {
       const userData = await getUserDataFromAccessToken(accessToken);
@@ -65,7 +63,6 @@ export const AuthProvider = ({ children }: { children: any }) => {
           if (userData) {
             setUser(userData);
             setIsAuthenticated(!!userData);
-            setToken(tokens.jwtAccessToken);
           }
         },
         logout: () => {
@@ -73,11 +70,11 @@ export const AuthProvider = ({ children }: { children: any }) => {
 
           setUser(null);
           setIsAuthenticated(false);
-          setToken(null);
+          removeAccessToken();
         },
         user,
         isSettled,
-        token,
+        getToken: getAccessToken,
       }}
     >
       {children}
