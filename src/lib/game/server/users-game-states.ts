@@ -1,21 +1,27 @@
+import { redisClient } from "@/lib/redis/redis";
 import { GameState } from "@/lib/game/game-states";
 
-const usersGameStates = new Map<string, GameState>();
+const getRedisKey = (userId: string) => `users-gamestates:${userId}`;
 
 export const storeUserGameState = async (userId: string, state: GameState) => {
-  usersGameStates.set(userId, state);
+  const serializedState = JSON.stringify(state);
+  await redisClient.set(getRedisKey(userId), serializedState);
 };
 
 export const getUserGameState = async (
   userId: string,
-): Promise<GameState | undefined> => {
-  return usersGameStates.get(userId);
+): Promise<GameState | null> => {
+  const serializedState = await redisClient.get(getRedisKey(userId));
+  return serializedState ? JSON.parse(serializedState) : null;
 };
 
 export const removeUserGameState = async (userId: string) => {
-  usersGameStates.delete(userId);
+  await redisClient.del(getRedisKey(userId));
 };
 
-export const getUsersGameStates = async (): Promise<Map<string, GameState>> => {
-  return usersGameStates;
+export const removeAllUserGameStates = async (): Promise<void> => {
+  const keys = await redisClient.keys("users-gamestates:*");
+  if (keys.length > 0) {
+    await redisClient.del(...keys);
+  }
 };

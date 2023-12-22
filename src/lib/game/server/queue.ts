@@ -28,3 +28,7 @@ export const fetchFromQueue = async (): Promise<PublicUser["uuid"] | null> => {
 export const removeFromQueue = async (player: PublicUser): Promise<void> => {
   await redisClient.srem(QUEUE_KEY, player.uuid);
 };
+
+export const removeAllFromQueue = async (): Promise<void> => {
+  await redisClient.del(QUEUE_KEY);
+};

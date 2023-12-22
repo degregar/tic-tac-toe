@@ -9,6 +9,8 @@ import {
 import { PublicUser } from "@/lib/user/types";
 import { GameStates } from "@/lib/game/game-states";
 import { createTestGameUsingEvents } from "@/lib/game/server/game-test-utils";
+import { removeAllFromQueue } from "@/lib/game/server/queue";
+import { removeAllUserGameStates } from "@/lib/game/server/users-game-states";
 
 const playerX = {
   uuid: "1234",
@@ -24,6 +26,11 @@ const currentStatusEvent: CurrentStatusRequestedEvent & { user: PublicUser } = {
 };
 
 describe("resolve game events", () => {
+  afterEach(async () => {
+    await removeAllFromQueue();
+    await removeAllUserGameStates();
+  });
+
   it("should resolve game events for current status requested event", async () => {
     // when
     const events = await resolveGameEvents(currentStatusEvent);

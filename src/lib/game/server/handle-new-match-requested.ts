@@ -6,27 +6,21 @@ import {
 import { PublicUser } from "@/lib/user/types";
 import { GameStates } from "@/lib/game/game-states";
 import { storeUserGameState } from "@/lib/game/server/users-game-states";
-import { findOpponent } from "@/lib/game/server/find-opponent";
 import { createGame } from "@/lib/game/server/game-controller";
+import { addToQueue, fetchFromQueue } from "@/lib/game/server/queue";
 
-export const handleNewMatchRequestedEvent = async (
-  data: NewMatchRequestedEvent & { user: PublicUser },
+const prepareMatch = async (
+  playerAUuid: string,
+  playerBUuid: string,
 ): Promise<GameEvent[]> => {
-  await storeUserGameState(data.user.uuid, {
-    status: GameStates.WAITING_FOR_PLAYERS,
-    game: null,
-  });
+  try {
+    const game = await createGame(playerAUuid, playerBUuid);
 
-  // @TODO: Should start transaction here to avoid race condition
-  const opponent = await findOpponent(data.user.uuid);
-  if (opponent) {
-    const game = await createGame(data.user.uuid, opponent.user.uuid);
-
-    await storeUserGameState(opponent.user.uuid, {
+    await storeUserGameState(playerBUuid, {
       status: GameStates.PLAYING,
       game,
     });
-    await storeUserGameState(data.user.uuid, {
+    await storeUserGameState(playerAUuid, {
       status: GameStates.PLAYING,
       game,
     });
@@ -37,16 +31,36 @@ export const handleNewMatchRequestedEvent = async (
         status: GameStates.PLAYING,
         game,
       },
-      recipient: data.user,
+      recipient: {
+        uuid: playerAUuid,
+      },
     };
-
     const opponentEvent: GameEvent = {
       ...event,
-      recipient: opponent.user,
+      recipient: {
+        uuid: playerBUuid,
+      },
     };
 
     return [event, opponentEvent];
+  } catch (e) {
+    await addToQueue({
+      uuid: playerBUuid,
+    });
+
+    return await addPlayerToQueue(playerAUuid);
   }
+};
+
+const addPlayerToQueue = async (playerUuid: string): Promise<GameEvent[]> => {
+  await addToQueue({
+    uuid: playerUuid,
+  });
+
+  await storeUserGameState(playerUuid, {
+    status: GameStates.WAITING_FOR_PLAYERS,
+    game: null,
+  });
 
   const event: GameEvent = {
     type: GameEvents.CURRENT_STATUS_UPDATED,
@@ -54,8 +68,22 @@ export const handleNewMatchRequestedEvent = async (
       status: GameStates.WAITING_FOR_PLAYERS,
       game: null,
     },
-    recipient: data.user,
+    recipient: {
+      uuid: playerUuid,
+    },
   };
 
   return [event];
+};
+
+export const handleNewMatchRequestedEvent = async (
+  data: NewMatchRequestedEvent & { user: PublicUser },
+): Promise<GameEvent[]> => {
+  const opponentUuid = await fetchFromQueue();
+
+  if (opponentUuid) {
+    return await prepareMatch(data.user.uuid, opponentUuid);
+  } else {
+    return await addPlayerToQueue(data.user.uuid);
+  }
 };
