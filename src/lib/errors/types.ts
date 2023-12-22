@@ -1,6 +1,13 @@
+export enum ErrorResponseCode {
+  INTERNAL_SERVER_ERROR = "internal_server_error",
+  METHOD_NOT_ALLOWED = "method_not_allowed",
+  UNAUTHORIZED = "unauthorized",
+  BAD_REQUEST = "bad_request",
+}
+
 export type ErrorResponse = {
   error: string;
-  error_code: string;
+  error_code: ErrorResponseCode;
 };
 
 export enum SocketErrors {

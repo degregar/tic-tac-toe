@@ -5,4 +5,5 @@ export type GameDto = {
   winnerUuid: string | null;
   turn: "X" | "O";
   board: Array<Array<"X" | "O" | null>>;
+  finishedAt: string | null;
 };

@@ -1,8 +1,8 @@
 import { GameDto } from "@/lib/game/types";
-import { postgresClient } from "@/lib/postgres/init-scripts/db";
+import { getPostgresClient } from "@/lib/postgres/db";
 
 export const storeGameResult = async (game: GameDto) => {
-  await postgresClient.connect();
+  const postgresClient = await getPostgresClient();
 
   try {
     const query = `
