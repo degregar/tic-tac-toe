@@ -85,12 +85,6 @@ export const Game = () => {
             isMyTurn={isMyTurn}
           />
         </div>
-
-        <div className={"text-center"}>
-          <span className={"text-xs text-gray-100"}>
-            Game: {currentGameState.game.uuid}
-          </span>
-        </div>
       </div>
     );
   }
