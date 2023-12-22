@@ -23,7 +23,5 @@ export const storeGameResult = async (game: GameDto) => {
     await postgresClient.query(query, values);
   } catch (error) {
     console.error("Error while storing game result", error);
-  } finally {
-    await postgresClient.end();
   }
 };
