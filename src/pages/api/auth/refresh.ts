@@ -1,6 +1,6 @@
 import { NextApiRequest, NextApiResponse } from "next";
 import { StatusCodes } from "http-status-codes";
-import { ErrorResponse } from "@/lib/errors/types";
+import { ErrorResponse, ErrorResponseCode } from "@/lib/errors/types";
 import { refreshTokens } from "@/lib/jwt/jwt";
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
@@ -9,7 +9,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 
     const errorResponse: ErrorResponse = {
       error: `Method ${req.method} Not Allowed`,
-      error_code: "method_not_allowed",
+      error_code: ErrorResponseCode.METHOD_NOT_ALLOWED,
     };
 
     res.status(StatusCodes.METHOD_NOT_ALLOWED).json(errorResponse);
@@ -22,7 +22,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   if (!refreshToken) {
     const errorResponse: ErrorResponse = {
       error: "Missing refresh token.",
-      error_code: "missing_refresh_token",
+      error_code: ErrorResponseCode.MISSING_REFRESH_TOKEN,
     };
 
     return res.status(StatusCodes.BAD_REQUEST).json(errorResponse);
@@ -34,7 +34,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   } catch (error: any) {
     const errorResponse: ErrorResponse = {
       error: "Invalid or expired refresh token.",
-      error_code: "invalid_or_expired_refresh_token",
+      error_code: ErrorResponseCode.INVALID_OR_EXPIRED_REFRESH_TOKEN,
     };
 
     res.status(StatusCodes.UNAUTHORIZED).json(errorResponse);

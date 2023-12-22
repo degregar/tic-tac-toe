@@ -3,6 +3,9 @@ export enum ErrorResponseCode {
   METHOD_NOT_ALLOWED = "method_not_allowed",
   UNAUTHORIZED = "unauthorized",
   BAD_REQUEST = "bad_request",
+  INVALID_CREDENTIALS = "invalid_credentials",
+  INVALID_OR_EXPIRED_REFRESH_TOKEN = "invalid_or_expired_refresh_token",
+  MISSING_REFRESH_TOKEN = "missing_refresh_token",
 }
 
 export type ErrorResponse = {

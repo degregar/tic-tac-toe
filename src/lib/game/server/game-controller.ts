@@ -19,6 +19,7 @@ export const createGame = async (
       [null, null, null],
       [null, null, null],
     ],
+    finishedAt: null,
   };
 
   await saveGame(game);
