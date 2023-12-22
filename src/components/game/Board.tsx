@@ -3,8 +3,8 @@ import { GameDto } from "@/lib/game/types";
 
 type BoardProps = {
   board: GameDto["board"];
-  onMakeMove: (coords: [number, number]) => void;
-  isMyTurn: boolean;
+  onMakeMove?: (coords: [number, number]) => void;
+  isMyTurn?: boolean;
 };
 
 export const Board = ({ board, onMakeMove, isMyTurn }: BoardProps) => {
@@ -17,7 +17,11 @@ export const Board = ({ board, onMakeMove, isMyTurn }: BoardProps) => {
           className={`w-16 h-16 border border-gray-300 ${
             isMyTurn ? "cursor-pointer hover:bg-gray-100" : "cursor-not-allowed"
           }`}
-          onClick={() => onMakeMove(coords)}
+          onClick={() => {
+            if (onMakeMove) {
+              onMakeMove(coords);
+            }
+          }}
         />
       );
     }
