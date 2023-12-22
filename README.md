@@ -38,6 +38,14 @@ The project is built using the following technologies:
 - [Docker](https://www.docker.com/) - Containerization
 - [Docker Compose](https://docs.docker.com/compose/) - Container orchestration
 
-### Approach
+### Overview
 
-Events are used to communicate between the server and the client. 
+Events sent via WebSockets are used to communicate between the server and the client.
+
+We use Redis to store the queue of players and game states, and PostgreSQL to store games history.
+
+We log in user using JWT tokens, which are stored in the browser's local storage.
+
+We don't require passing any user data to the server, except for the JWT token, which is used to identify the user. New accounts are created automatically when logging in for the first time.
+
+Main business logic is to be found in `src/lib/game/server/game-events-resolver.ts`
