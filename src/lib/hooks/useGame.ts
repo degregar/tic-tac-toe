@@ -62,6 +62,10 @@ export const useGame = () => {
 
   const startNewGame = async () => {
     if (!user) {
+      setError({
+        error: "You need to be logged in to start a new game.",
+        error_code: GameErrors.NOT_AUTHENTICATED,
+      });
       return;
     }
 
@@ -69,7 +73,19 @@ export const useGame = () => {
   };
 
   const makeMove = async (move: [number, number]) => {
-    if (!user || !gameState?.game?.uuid) {
+    if (!user) {
+      setError({
+        error: "You need to be logged in to start a new game",
+        error_code: GameErrors.NOT_AUTHENTICATED,
+      });
+      return;
+    }
+
+    if (!gameState?.game?.uuid) {
+      setError({
+        error: "No game in progress",
+        error_code: GameErrors.UNKNOWN,
+      });
       return;
     }
 

@@ -14,6 +14,7 @@ export type SocketError = {
 
 export enum GameErrors {
   NO_CONNECTION = "no_connection",
+  NOT_AUTHENTICATED = "not_authenticated",
   UNKNOWN = "unknown",
 }
 
