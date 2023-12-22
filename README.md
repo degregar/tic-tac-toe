@@ -5,6 +5,8 @@ This project is a web application for the classic Tic-Tac-Toe game, featuring a 
 
 More information about the project can be found in the [TASK.md](TASK.md) file.
 
+Demo: [https://ttt-demo.kukla.tech](https://ttt-demo.kukla.tech)
+
 ## Getting Started
 
 1. Copy `.env.example` to `.env.local` and fill in the values.
