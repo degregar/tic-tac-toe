@@ -1,17 +1,16 @@
 import { useCallback, useState } from "react";
 import { io, Socket } from "socket.io-client";
 import { securedAxios } from "@/lib/auth/axios";
-import { GameDto } from "@/lib/game/types";
 import { JwtAccessToken, SocketEvents } from "@/lib/socket/types";
 import { GameEvent } from "@/lib/game/game-events";
+import { SocketError, SocketErrors } from "@/lib/errors/types";
 
 export const useSocket = (
   token: string | null,
   onGameEvent: (event: GameEvent) => void,
+  onError: (error: SocketError) => void,
 ) => {
   const [connection, setConnection] = useState<Socket | null>(null);
-  const [currentGame, setCurrentGame] = useState<GameDto | null>(null);
-  const [gameEvent, setGameEvent] = useState<GameEvent | null>(null);
 
   const connect = useCallback(async () => {
     if (!token) {
@@ -30,8 +29,10 @@ export const useSocket = (
     } catch (error) {
       console.error("Failed to connect to socket", error);
 
-      // @TODO handle error, maybe exponential backoff
-
+      onError({
+        error: "Failed to connect to the game server",
+        error_code: SocketErrors.NO_CONNECTION,
+      });
       setConnection(null);
     }
   }, []);
@@ -65,6 +66,5 @@ export const useSocket = (
     disconnect,
     isConnected: !!connection,
     emit,
-    currentGame,
   };
 };

@@ -13,6 +13,7 @@ export const Game = () => {
     isMyTurn,
     makeMove,
     isGameFinished,
+    error,
   } = useGame();
   const { user } = useAuth();
 
@@ -21,6 +22,10 @@ export const Game = () => {
       void fetchStatus();
     }
   }, [isConnected]);
+
+  if (error) {
+    return <div>{error.error}</div>;
+  }
 
   if (!isConnected) {
     return <div>Connecting to the game server...</div>;

@@ -7,10 +7,17 @@ import {
   isCurrentStatusUpdatedEvent,
 } from "@/lib/game/game-events";
 import { GameState, GameStates } from "@/lib/game/game-states";
+import {
+  GameError,
+  GameErrors,
+  SocketError,
+  SocketErrors,
+} from "@/lib/errors/types";
 
 export const useGame = () => {
   const { user, token } = useAuth();
   const [gameState, setGameState] = useState<GameState | null>(null);
+  const [error, setError] = useState<GameError | null>(null);
 
   const handleGameEvent = (event: GameEvent) => {
     if (isCurrentStatusUpdatedEvent(event)) {
@@ -18,9 +25,27 @@ export const useGame = () => {
     }
   };
 
+  const handleConnectionError = (error: SocketError) => {
+    if (error.error_code === SocketErrors.NO_CONNECTION) {
+      setError({
+        error:
+          "Failed to connect to the game server. Please try again later or check your internet connection.",
+        error_code: GameErrors.NO_CONNECTION,
+      });
+    } else {
+      setError({
+        error: "Unknown error",
+        error_code: GameErrors.UNKNOWN,
+      });
+    }
+
+    setGameState(null);
+  };
+
   const { emit, connect, disconnect, isConnected } = useSocket(
     token,
     handleGameEvent,
+    handleConnectionError,
   );
 
   useEffect(() => {
@@ -67,5 +92,6 @@ export const useGame = () => {
     isMyTurn,
     makeMove,
     isGameFinished,
+    error,
   };
 };
